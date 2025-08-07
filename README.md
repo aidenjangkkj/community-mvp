@@ -60,5 +60,3 @@ community-mvp/
 | `npm run format` | ESLint 자동 수정 + Prettier 포맷팅           |
 
 ---
-
-필요한 다른 정보가 있다면 알려주세요!
