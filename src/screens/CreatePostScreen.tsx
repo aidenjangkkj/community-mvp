@@ -3,8 +3,12 @@ import { View, TextInput, Pressable, Text, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { db } from '../firebase/firebaseConfig';
-import { auth } from '../firebase/firebaseConfig';
+import { db,storage } from '../firebase/firebaseConfig';
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL
+} from 'firebase/storage';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePost'>;
@@ -24,22 +28,45 @@ const CreatePostScreen: React.FC<Props> = ({ navigation }) => {
   };
 
 const handleSubmit = async () => {
-    if (!title || !content) {
-      Alert.alert('잠깐!', '닉네임, 제목, 내용을 모두 입력해주세요.');
+    if (!nickname.trim() || !title.trim() || !content.trim()) {
+      Alert.alert('Validation', '닉네임, 제목, 내용을 모두 입력해주세요.');
       return;
     }
+
+    let downloadUrl: string | null = null;
+    if (imageUrl) {
+      try {
+        // 1) 로컬 파일을 blob 으로 변환
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+
+        // 2) Storage 참조 생성 (posts/타임스탬프)
+        const fileRef = storageRef(storage, `posts/${Date.now()}`);
+
+        // 3) 업로드
+        await uploadBytes(fileRef, blob);
+
+        // 4) 다운로드 URL 가져오기
+        downloadUrl = await getDownloadURL(fileRef);
+      } catch (e: any) {
+        console.error('Storage Upload Error:', e);
+        Alert.alert('Error', '이미지 업로드에 실패했습니다.');
+        return;
+      }
+    }
+
     try {
-        const user = auth.currentUser;
+      // Firestore에 포스트 저장
       await addDoc(collection(db, 'posts'), {
         author: nickname.trim(),
-        title,
-        content,
-        imageUrl: imageUrl || null,
+        title: title.trim(),
+        content: content.trim(),
+        imageUrl: downloadUrl,
         createdAt: serverTimestamp(),
       });
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('오류', error.message);
+      Alert.alert('Error', error.message);
     }
   };
 
