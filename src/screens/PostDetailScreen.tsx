@@ -1,108 +1,106 @@
-// File: src/screens/PostDetailScreen.tsx
+// src/screens/PostDetailScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Comment } from '../../types';
-import CommentItem from '../../components/CommentItem';
 import { db } from '../firebase/firebaseConfig';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { formatTimestamp } from '../utils/formatTimestamp';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { formatTimestamp } from '../../src/utils/formatTimestamp';
+import CommentItem from '../../components/CommentItem';
 
-type DetailProps = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
 
-const PostDetailScreen: React.FC<DetailProps> = ({ route }) => {
+export default function PostDetailScreen({ route }: Props) {
   const { post } = route.params;
-  const [nickname, setNickname] = useState<string>('익명');
   const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState<string>('');
+  const [text, setText] = useState('');
 
   useEffect(() => {
-    const commentsRef = collection(db, 'posts', post.id, 'comments');
-    const q = query(commentsRef, orderBy('createdAt', 'asc'));
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        postId: post.id,
-        ...(doc.data() as Omit<Comment, 'id' | 'postId'>)
-      }));
-      setComments(list);
-    });
-    return () => unsubscribe();
+    const q = query(
+      collection(db, 'posts', post.id, 'comments'),
+      orderBy('createdAt', 'asc')
+    );
+    const unsub = onSnapshot(q, snap =>
+      setComments(
+        snap.docs.map(d => ({ id: d.id, postId: post.id, ...(d.data() as any) }))
+      )
+    );
+    return () => unsub();
   }, [post.id]);
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) {
-      Alert.alert('잠깐!', '댓글을 입력해주세요.');
-      return;
-    }
-    try {
-      await addDoc(collection(db, 'posts', post.id, 'comments'), {
-        text: newComment.trim(),
-        createdAt: serverTimestamp(),
-        author: nickname.trim(),
-      });
-      setNewComment('');
-    } catch (error: any) {
-      Alert.alert('오류', error.message);
-    }
+  const handleAdd = async () => {
+    if (!text.trim()) return;
+    await addDoc(collection(db, 'posts', post.id, 'comments'), {
+      author: '익명',
+      text: text.trim(),
+      createdAt: serverTimestamp(),
+    });
+    setText('');
   };
 
-    const formattedDate = formatTimestamp(post.createdAt);
+  const date = formatTimestamp(post.createdAt);
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
+      className="flex-1 bg-gray-100"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <FlatList
         data={comments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <CommentItem comment={item} />}
+        keyExtractor={c => c.id}
         ListHeaderComponent={
-          <View className="p-4">
-            <Text className="text-2xl font-bold mb-2">{post.title}</Text>
-            <Text className="text-sm text-gray-500 mb-2">
-              작성자: {post.author} | 작성일: {formattedDate}
+          <View className="bg-white rounded-2xl shadow p-4 m-4">
+            <Text className="text-2xl font-bold mb-1 text-gray-900">
+              {post.title}
             </Text>
-            <Text className="text-base mb-4">{post.content}</Text>
+            <Text className="text-sm text-gray-500 mb-3">
+              {post.author} · {date}
+            </Text>
             {post.imageUrl && (
               <Image
                 source={{ uri: post.imageUrl }}
-                className="w-full h-48 mb-4 rounded-md"
-                resizeMode="stretch"
+                resizeMode="contain"
+                className="w-full h-48 rounded-lg mb-3"
               />
             )}
-            <Text className="text-lg font-semibold ml-1 mb-2">댓글</Text>
+            <Text className="text-base text-gray-700">{post.content}</Text>
+            <Text className="text-lg font-semibold mt-6">댓글</Text>
           </View>
         }
-        ListFooterComponent={
-          <View className="p-4">
-            <View className='flex-row items-center'>
-                <Text className='mr-2 mb-2'>닉네임</Text>
-            <TextInput
-                    className="border border-gray-300 rounded-md mb-2 text-center"
-                    placeholder="미 작성 시 익명으로 표기"
-                    value={nickname}
-                    onChangeText={setNickname}
-                  />
-            </View>
-            
-            <TextInput
-              className="border border-gray-300 rounded-md px-3 py-2 mb-2"
-              placeholder="댓글을 입력해주세요"
-              value={newComment}
-              onChangeText={setNewComment}
-            />
-            
-            <Pressable className="bg-green-500 rounded-md py-2" onPress={handleAddComment}>
-              <Text className="text-center text-white font-semibold">댓글 등록</Text>
-            </Pressable>
-          </View>
-        }
+        renderItem={({ item }) => <CommentItem comment={item} />}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
+      <View className="absolute bottom-0 w-full bg-white p-4 border-t border-gray-200 flex-row items-center">
+        <TextInput
+          className="flex-1 border border-gray-300 rounded-full px-4 py-2 mr-2"
+          placeholder="댓글을 입력하세요..."
+          value={text}
+          onChangeText={setText}
+        />
+        <Pressable
+          className="bg-blue-600 rounded-full px-4 py-2"
+          onPress={handleAdd}
+        >
+          <Text className="text-white">전송</Text>
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
-};
-
-export default PostDetailScreen;
+}

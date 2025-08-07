@@ -1,3 +1,4 @@
+// src/screens/PostListScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, Pressable, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -5,51 +6,50 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { Post } from '../../types';
 import { db } from '../firebase/firebaseConfig';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { formatTimestamp } from '../utils/formatTimestamp';
+import PostItem from '../../components/PostItem';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PostList'>;
 
-const PostListScreen: React.FC<Props> = ({ navigation }) => {
+export default function PostListScreen({ navigation }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Post, 'id'>) }));
-      setPosts(list);
+    const unsub = onSnapshot(q, snap => {
+      setPosts(
+        snap.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Post, 'id'>),
+        }))
+      );
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
   return (
-    <View className="flex-1 p-4 bg-white">
+    <View className="flex-1 bg-gray-100">
       <FlatList
+        contentContainerStyle={{ padding: 16 }}
         data={posts}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => {
-          const date = formatTimestamp(item.createdAt);
-          return (
-            <Pressable
-              className="p-4 border-b border-gray-200"
-              onPress={() => navigation.navigate('PostDetail', { post: item })}
-            >
-              <Text className="text-lg font-bold mb-1">{item.title}</Text>
-              <Text className="text-sm text-gray-500">
-                {item.author} | {date}
-              </Text>
-            </Pressable>
-          );
-        }}
-        className="mb-4"
+        keyExtractor={i => i.id}
+        renderItem={({ item }) => (
+          <PostItem
+            post={item}
+            onPress={() => navigation.navigate('PostDetail', { post: item })}
+          />
+        )}
+        ListEmptyComponent={
+          <Text className="text-center text-gray-500 mt-8">
+            아직 작성된 글이 없습니다.
+          </Text>
+        }
       />
       <Pressable
-        className="bg-blue-500 rounded-md py-3"
+        className="absolute bottom-8 right-8 bg-blue-600 rounded-full p-4 shadow-lg"
         onPress={() => navigation.navigate('CreatePost')}
       >
-        <Text className="text-center text-white font-semibold">글쓰기</Text>
+        <Text className="text-white text-2xl">＋</Text>
       </Pressable>
     </View>
   );
-};
-
-export default PostListScreen;
+}

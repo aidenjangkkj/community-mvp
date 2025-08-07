@@ -3,14 +3,14 @@ import { View, TextInput, Pressable, Text, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { db, auth } from '../firebase/firebaseConfig';
+import { db } from '../firebase/firebaseConfig';
+import { auth } from '../firebase/firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePost'>;
 
 const CreatePostScreen: React.FC<Props> = ({ navigation }) => {
-  const defaultNickname = auth.currentUser?.displayName || '익명';
-  const [nickname, setNickname] = useState<string>(defaultNickname);
+    const [nickname, setNickname] = useState<string>('익명');
   const [title, setTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -23,15 +23,15 @@ const CreatePostScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!title.trim() || !content.trim()) {
-      Alert.alert('잠깐!', '제목과 내용을 모두 입력해주세요.');
+const handleSubmit = async () => {
+    if (!title || !content) {
+      Alert.alert('잠깐!', '닉네임, 제목, 내용을 모두 입력해주세요.');
       return;
     }
-    const author = nickname.trim() || defaultNickname;
     try {
+        const user = auth.currentUser;
       await addDoc(collection(db, 'posts'), {
-        author,
+        author: nickname.trim(),
         title,
         content,
         imageUrl: imageUrl || null,
