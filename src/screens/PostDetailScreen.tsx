@@ -47,6 +47,7 @@ const PostDetailScreen: React.FC<DetailProps> = ({ route }) => {
       Alert.alert('오류', error.message);
     }
   };
+
     const formattedDate = formatTimestamp(post.createdAt);
 
   return (
