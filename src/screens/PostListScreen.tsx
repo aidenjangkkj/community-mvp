@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Post } from '../../types';
 import { db } from '../firebase/firebaseConfig';
-import { format } from 'date-fns';
+import { formatTimestamp } from '../utils/formatTimestamp';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PostList'>;
@@ -27,9 +27,7 @@ const PostListScreen: React.FC<Props> = ({ navigation }) => {
         data={posts}
         keyExtractor={item => item.id}
         renderItem={({ item }) => {
-          const date = item.createdAt?.toDate
-            ? format(item.createdAt.toDate(), 'yyyy-MM-dd HH:mm')
-            : '';
+          const date = formatTimestamp(item.createdAt);
           return (
             <Pressable
               className="p-4 border-b border-gray-200"

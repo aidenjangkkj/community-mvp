@@ -7,7 +7,7 @@ import { Comment } from '../../types';
 import CommentItem from '../../components/CommentItem';
 import { db } from '../firebase/firebaseConfig';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { format } from 'date-fns';
+import { formatTimestamp } from '../utils/formatTimestamp';
 
 type DetailProps = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
 
@@ -47,9 +47,7 @@ const PostDetailScreen: React.FC<DetailProps> = ({ route }) => {
       Alert.alert('오류', error.message);
     }
   };
-    const formattedDate = post.createdAt?.toDate
-    ? format(post.createdAt.toDate(), 'yyyy-MM-dd HH:mm')
-    : '';
+  const formattedDate = formatTimestamp(post.createdAt);
 
   return (
     <KeyboardAvoidingView
