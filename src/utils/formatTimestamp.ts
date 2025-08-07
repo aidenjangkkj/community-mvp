@@ -8,3 +8,5 @@ export function formatTimestamp(
   const date = timestamp instanceof Date ? timestamp : timestamp.toDate();
   return format(date, 'yyyy-MM-dd HH:mm');
 }
+
+export default formatTimestamp;
