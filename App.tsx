@@ -1,13 +1,12 @@
-import { ScreenContent } from 'components/ScreenContent';
-import { StatusBar } from 'expo-status-bar';
+import 'react-native-gesture-handler';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './src/navigation/AppNavigator';
+import './global.css'
+const App: React.FC = () => (
+  <NavigationContainer>
+    <AppNavigator />
+  </NavigationContainer>
+);
 
-import './global.css';
-
-export default function App() {
-  return (
-    <>
-      <ScreenContent title="Home" path="App.tsx"></ScreenContent>
-      <StatusBar style="auto" />
-    </>
-  );
-}
+export default App;
