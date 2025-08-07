@@ -5,7 +5,9 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { Post } from '../../types';
 import { db } from '../firebase/firebaseConfig';
 import { formatTimestamp } from '../utils/formatTimestamp';
+
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { formatTimestamp } from '../utils/formatTimestamp';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PostList'>;
 
@@ -23,7 +25,7 @@ const PostListScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 p-4 bg-white">
-<FlatList
+      <FlatList
         data={posts}
         keyExtractor={item => item.id}
         renderItem={({ item }) => {
@@ -42,7 +44,10 @@ const PostListScreen: React.FC<Props> = ({ navigation }) => {
         }}
         className="mb-4"
       />
-      <Pressable className="bg-blue-500 rounded-md py-3" onPress={() => navigation.navigate('CreatePost')}>
+      <Pressable
+        className="bg-blue-500 rounded-md py-3"
+        onPress={() => navigation.navigate('CreatePost')}
+      >
         <Text className="text-center text-white font-semibold">글쓰기</Text>
       </Pressable>
     </View>
