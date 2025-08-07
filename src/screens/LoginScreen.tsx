@@ -38,7 +38,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <TouchableOpacity className="mb-2 rounded-md bg-blue-500 py-3" onPress={handleLogin}>
         <Text className="text-center font-semibold text-white">로그인</Text>
       </TouchableOpacity>
-      <TouchableOpacity className="py-3 rounded-md border border-gray-400 bg-white" onPress={() => navigation.navigate('Register')}>
+      <TouchableOpacity
+        className="py-3 rounded-md border border-gray-400 bg-white"
+        onPress={() => navigation.navigate('Register')}>
         <Text className="text-center font-semibold text-blue-500">회원가입</Text>
       </TouchableOpacity>
     </View>
