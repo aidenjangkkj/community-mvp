@@ -4,8 +4,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Post } from '../../types';
 import { db } from '../firebase/firebaseConfig';
-import { formatTimestamp } from '../utils/formatTimestamp';
-
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
