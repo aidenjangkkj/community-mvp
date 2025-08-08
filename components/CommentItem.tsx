@@ -11,7 +11,7 @@ interface Props {
 const CommentItem: React.FC<Props> = ({ comment }) => {
   const date = formatTimestamp(comment.createdAt);
   return (
-    <View className="p-2 border-b border-gray-100">
+    <View className="ml-2 p-2 border-b border-gray-100">
       <Text className="text-sm text-gray-500 mb-1">
         {comment.author} | {date}
       </Text>

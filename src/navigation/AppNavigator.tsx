@@ -22,7 +22,11 @@ const AppNavigator: React.FC = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="PostList" component={PostListScreen} options={{ title: '전체글' }} />
-    <Stack.Screen name="PostDetail" component={PostDetailScreen} options={{ title: '현재글' }} />
+    <Stack.Screen
+      name="PostDetail"
+      component={PostDetailScreen}
+      options={({ route }) => ({ title: route.params.post.title })}
+    />
     <Stack.Screen name="CreatePost" component={CreatePostScreen} options={{ title: '글쓰기' }} />
   </Stack.Navigator>
 );

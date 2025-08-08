@@ -3,7 +3,7 @@ import { View, TextInput, Pressable, Text, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { db,storage } from '../firebase/firebaseConfig';
+import { db,storage,auth } from '../firebase/firebaseConfig';
 import {
   ref as storageRef,
   uploadBytes,
@@ -14,7 +14,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePost'>;
 
 const CreatePostScreen: React.FC<Props> = ({ navigation }) => {
-    const [nickname, setNickname] = useState<string>('익명');
+    const user = auth.currentUser;
+    const nickname = user?.displayName ?? '익명';
   const [title, setTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -29,36 +30,33 @@ const CreatePostScreen: React.FC<Props> = ({ navigation }) => {
 
 const handleSubmit = async () => {
     if (!nickname.trim() || !title.trim() || !content.trim()) {
-      Alert.alert('Validation', '닉네임, 제목, 내용을 모두 입력해주세요.');
+      Alert.alert('잠깐!', '제목, 내용을 모두 입력해주세요.');
       return;
     }
 
     let downloadUrl: string | null = null;
     if (imageUrl) {
       try {
-        // 1) 로컬 파일을 blob 으로 변환
         const response = await fetch(imageUrl);
         const blob = await response.blob();
 
-        // 2) Storage 참조 생성 (posts/타임스탬프)
+
         const fileRef = storageRef(storage, `posts/${Date.now()}`);
 
-        // 3) 업로드
+
         await uploadBytes(fileRef, blob);
 
-        // 4) 다운로드 URL 가져오기
         downloadUrl = await getDownloadURL(fileRef);
       } catch (e: any) {
-        console.error('Storage Upload Error:', e);
-        Alert.alert('Error', '이미지 업로드에 실패했습니다.');
+        Alert.alert('오류', '이미지 업로드에 실패했습니다.');
         return;
       }
     }
 
     try {
-      // Firestore에 포스트 저장
       await addDoc(collection(db, 'posts'), {
         author: nickname.trim(),
+        authorUid: user!.uid,
         title: title.trim(),
         content: content.trim(),
         imageUrl: downloadUrl,
@@ -66,18 +64,12 @@ const handleSubmit = async () => {
       });
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert('오류', error.message);
     }
   };
 
   return (
     <View className="flex-1 p-4 bg-white">
-              <TextInput
-        className="border border-gray-300 rounded-md px-3 py-2 mb-4"
-        placeholder="닉네임(미 작성 시 익명으로 표기)"
-        value={nickname}
-        onChangeText={setNickname}
-      />
       <TextInput
         className="border border-gray-300 rounded-md px-3 py-2 mb-4"
         placeholder="제목"

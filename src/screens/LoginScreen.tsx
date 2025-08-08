@@ -16,7 +16,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       navigation.replace('PostList');
     } catch (error: any) {
-      Alert.alert('Login Error', error.message);
+      Alert.alert('로그인 오류', error.message);
     }
   };
 
