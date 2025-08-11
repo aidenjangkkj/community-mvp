@@ -23,7 +23,6 @@
 community-mvp/
 ├─ App.tsx                # 앱 진입점. NavigationContainer로 스택 네비게이션 설정
 ├─ components/            # PostItem, CommentItem 등 공용 컴포넌트
-├─ docs/                  # 개발 문서(timestamps 등)
 ├─ src/
 │  ├─ navigation/         # AppNavigator: 스택 라우트 정의
 │  ├─ screens/            # Login, Register, PostList, PostDetail, CreatePost 스크린
