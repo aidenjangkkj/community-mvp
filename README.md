@@ -60,4 +60,11 @@ community-mvp/
 | `npm run lint`   | ESLint 및 Prettier 검사                      |
 | `npm run format` | ESLint 자동 수정 + Prettier 포맷팅           |
 
+
+## 시연영상
+
+
+https://github.com/user-attachments/assets/11ac25b2-1d95-4b0d-9dba-84e206c2efac
+
+
 ---
